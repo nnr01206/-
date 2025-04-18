@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>街角書店選書服務 | Carreau de Réverie</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600&family=Noto+Sans+TC:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind + DaisyUI CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.6.1/dist/full.min.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --p: #00CACA;      /* 主色 (DaisyUI primary) */
+      --pf: #ffffff;     /* 主色前景 (white) */
+    }
+    body {font-family:"Noto Sans TC", sans-serif;}
+    h1,h2,h3 {font-family:"Noto Serif TC", serif;}
+  </style>
+</head>
+<body class="bg-base-100">
+  <!-- Navbar -->
+  <div class="navbar bg-base-100 shadow-sm fixed top-0 z-30">
+    <div class="container mx-auto px-4">
+      <div class="flex-1">
+        <a class="text-lg font-bold text-primary">街角書店 Carreau de Réverie</a>
+      </div>
+      <div class="flex-none">
+        <a href="#books" class="btn btn-sm btn-ghost">選書服務</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero relative min-h-[50vh] pt-20 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=1600&q=80');">
+    <div class="absolute inset-0 hero-overlay bg-gray-600/50 backdrop-blur-[2px]"></div>
+    <div class="hero-content relative text-center text-neutral-content">
+      <div class="max-w-xl">
+        <h1 class="mb-5 text-4xl font-bold">旅途中的一本書</h1>
+        <p class="mb-5">挑選專屬你的旅讀夥伴。點擊封面，五分鐘完成問卷，我們會在入住前把書放到房內。</p>
+        <a href="#books" class="btn btn-primary">開始選書</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Book grid -->
+  <section id="books" class="container mx-auto px-4 py-16 grid gap-10 sm:grid-cols-2 lg:grid-cols-3"></section>
+
+  <!-- Modal -->
+  <input type="checkbox" id="formModal" class="modal-toggle" />
+  <div class="modal" role="dialog">
+    <div class="modal-box w-11/12 max-w-5xl p-0">
+      <label for="formModal" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+      <iframe id="gForm" class="w-full h-[85vh]" loading="lazy"></iframe>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer footer-center p-6 bg-base-200 text-base-content">
+    <aside>
+      <p>© 2025 街角書店 Carreau de Réverie</p>
+    </aside>
+  </footer>
+
+  <script>
+    /* 書籍資料 */
+    const books = [
+      { title: "好人生的管理心法", author: "劉潤", cover: "https://im2.book.com.tw/image/getImage?i=https://www.books.com.tw/img/001/100/58/36/0011005836.jpg&w=500&h=500", desc: "用 5 大管理心法與 20 堂實踐課，帶你打造長久幸福與成功的人生。" },
+      { title: "原子習慣", author: "詹姆斯‧克利爾", cover: "https://im2.book.com.tw/image/getImage?i=https://www.books.com.tw/img/001/082/25/0010822511.jpg&w=500&h=500", desc: "細微改變帶來巨大成就的實證法則，建立系統性的好習慣。" },
+      { title: "人類大歷史", author: "哈拉瑞", cover: "https://im1.book.com.tw/image/getImage?i=https://www.books.com.tw/img/001/077/46/0010774691.jpg&w=500&h=500", desc: "從野獸到扮演上帝，洞悉人類文明發展的關鍵脈絡。" }
+    ];
+
+    const PREFILL_BASE = "https://docs.google.com/forms/d/e/1FAIpQLScTfAeqDFLhUMgBz2M0lA6iQV0pphdE8utSKs5ZX--cSwEVXw/viewform?usp=pp_url&entry.1687129680=";
+    const grid = document.getElementById('books');
+    const gForm = document.getElementById('gForm');
+
+    /* 動態產生卡片 */
+    books.forEach(b => {
+      const card = document.createElement('div');
+      card.className = 'card bg-base-100 shadow-md cursor-pointer hover:shadow-xl transition';
+      card.innerHTML = `
+        <figure class="h-60 overflow-hidden"><img src="${b.cover}" alt="${b.title}" class="object-cover w-full h-full" /></figure>
+        <div class="card-body">
+          <h2 class="card-title">${b.title}</h2>
+          <p class="text-sm text-base-content/70 mb-4">${b.author}</p>
+          <p class="text-sm flex-1">${b.desc}</p>
+        </div>`;
+
+      card.addEventListener('click', () => {
+        // 加入當前時間戳，確保每次載入的 URL 都不同
+        const newUrl = PREFILL_BASE + encodeURIComponent(`${b.title}｜${b.author}`) + "&_=" + Date.now();
+        gForm.src = newUrl;
+        document.getElementById('formModal').checked = true;
+      });
+      grid.appendChild(card);
+    });
+
+    /* 關閉 Modal 時清空 iframe 以節省流量 */
+    document.getElementById('formModal').addEventListener('change', (e) => {
+      if (!e.target.checked) gForm.src = '';
+    });
+  </script>
+</body>
+</html>
